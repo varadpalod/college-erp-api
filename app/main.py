@@ -1,5 +1,11 @@
-from fastapi import FastAPI
-from models.models import Student 
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+
+from models.models import StudentPydantic
+from models.student import Student
+from database.database import Base, engine, get_db
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="CampusCore API",
@@ -27,41 +33,25 @@ students = [
 ]
 
 @app.get("/students")
-def get_students():
-    return [
-        {
-        "id":1,
-        "name" : "varad",
-        "branch": "entc"
-
-    },
-    {
-        "id":2,
-        "name": "sam",
-        "branch": "it"
-    }
-    ]
+def get_students(db: Session = Depends(get_db)):
+    students = db.query(Student).all()
+    return students
 
 @app.get("/students/{id}")
-def get_student(id: int):
-    for student in students:
-        if student["id"]==id:
-            return student 
-        
-    return {
-        "error" : "user not found"
-    }
+def get_student(id:int,db: Session = Depends(get_db)):
+    student = db.query(Student).filter(Student.id==id) 
+    return student
 
 @app.post("/students")
-def create_student(student :Student):
-    for existing_student in students:
-        if existing_student["id"]==student.id:
-            return {"error":"id already exists"}
-        
-    students.append(student.model_dump())
+def create_student(student :StudentPydantic,db:Session=Depends(get_db)):
+    existing_student= db.query(Student).filter(Student.roll_no==student.roll_no).first()
+    if(existing_student is not None):
+        return "ROll No already exists"
 
-    return {
-        "message": "Student Added ",
-        "student": student
-    }
+    db_student = Student(**student.model_dump())
+    db.add(db_student)
+    db.commit()
+    db.refresh(db_student)
 
+    return db_student
+    
