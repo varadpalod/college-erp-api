@@ -1,7 +1,6 @@
-from database.database import get_db
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, Depends, HTTPException 
-from schemas.student import StudentCreate,StudentResponse
+from fastapi import HTTPException 
+from schemas.student import StudentCreate
 from models.student import Student
 
 def get_students(db:Session):

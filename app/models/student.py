@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, Date, DECIMAL
 from database.database import Base
 
+from sqlalchemy.orm import relationship
 
 class Student(Base):
     __tablename__ = "students"
@@ -21,3 +22,5 @@ class Student(Base):
 
     dob = Column(Date, nullable=False)
     cgpa = Column(DECIMAL(3, 2), nullable=False)
+
+    attendances=relationship("Attendance",back_populates="student")

@@ -1,9 +1,7 @@
-from fastapi import FastAPI, Depends, HTTPException 
-from sqlalchemy.orm import Session
-
-from models.student import Student
-from database.database import Base, engine, get_db
+from fastapi import FastAPI
+from database.database import Base, engine
 from routers.student import router as router_student
+from routers.attendance import router as router_attendance
 
 Base.metadata.create_all(bind=engine)
 
@@ -14,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(router_student)
+app.include_router(router_attendance)
 
 @app.get("/")
 def home():
